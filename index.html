@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>اختبار QCM</title>
+
+<style>
+body {
+  font-family: Arial;
+  direction: rtl;
+  background: #f0f0f0;
+  padding: 30px;
+}
+
+.box {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 650px;
+  margin: auto;
+}
+
+.option {
+  border: 1px solid #ccc;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.correct { background: #c8f7c5; border-color: green; }
+.wrong { background: #f7c5c5; border-color: red; }
+.chosen { border: 2px solid #333; }
+
+button {
+  margin-top: 10px;
+  padding: 10px;
+  width: 100%;
+  cursor: pointer;
+}
+
+#result { display: none; }
+
+/* بطارية */
+.battery-phone {
+  width: 200px;
+  height: 80px;
+  border: 4px solid #333;
+  border-radius: 10px;
+  position: relative;
+  margin: 20px auto;
+}
+
+.battery-head {
+  width: 10px;
+  height: 30px;
+  background: #333;
+  position: absolute;
+  right: -14px;
+  top: 25px;
+}
+
+.battery-level {
+  height: 100%;
+  width: 0%;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box" id="quiz">
+  <h2 id="question"></h2>
+  <div id="options"></div>
+  <p id="explanation"></p>
+  <button onclick="next()">التالي</button>
+</div>
+
+<div class="box" id="result">
+  <h2>📊 نتيجتك</h2>
+  <p id="finalScore"></p>
+
+  <div class="battery-phone">
+    <div class="battery-level" id="battery">
+      <span id="batteryText">0%</span>
+    </div>
+    <div class="battery-head"></div>
+  </div>
+
+  <button onclick="startReview()">📘 مراجعة الاختبار</button>
+  <button onclick="restart()">🔁 إعادة الاختبار</button>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "ما أفضل طريقة لتعلم البرمجة؟",
+    options: ["حفظ الكتب", "التعلم مع التطبيق", "الانتظار", "الحظ"],
+    correct: 1,
+    exp: "التعلم مع التطبيق هو الأفضل."
+  },
+  {
+    q: "ما وظيفة HTML؟",
+    options: ["ألوان", "تخزين", "بناء الصفحة", "حماية"],
+    correct: 2,
+    exp: "HTML تبني الصفحة."
+  },
+  {
+    q: "JavaScript تُستخدم من أجل؟",
+    options: ["صور", "تفاعل", "خطوط", "ترجمة"],
+    correct: 1,
+    exp: "JavaScript تضيف التفاعل."
+  },
+  {
+    q: "أفضل بداية لمشروع؟",
+    options: ["فكرة بسيطة", "مشروع ضخم", "تقليد", "انتظار"],
+    correct: 0,
+    exp: "ابدأ صغيرًا."
+  },
+  {
+    q: "ما سر الاستمرار؟",
+    options: ["المال", "الصبر", "الحظ", "الذكاء"],
+    correct: 1,
+    exp: "الصبر أساس النجاح."
+  }
+];
+
+let i = 0;
+let score = 0;
+let answers = [];
+let reviewMode = false;
+
+function load() {
+  explanation.innerText = "";
+  const q = questions[i];
+  question.innerText = q.q;
+  options.innerHTML = "";
+
+  q.options.forEach((text, idx) => {
+    const div = document.createElement("div");
+    div.className = "option";
+    div.innerText = text;
+
+    if (reviewMode) {
+      if (idx === q.correct) div.classList.add("correct");
+      if (answers[i] === idx) div.classList.add("chosen");
+      if (answers[i] === idx && idx !== q.correct) div.classList.add("wrong");
+    } else {
+      div.onclick = () => answer(div, idx);
+    }
+
+    options.appendChild(div);
+  });
+
+  if (reviewMode) explanation.innerText = q.exp;
+}
+
+function answer(el, idx) {
+  answers[i] = idx;
+  const q = questions[i];
+  document.querySelectorAll(".option").forEach(o => o.onclick = null);
+
+  if (idx === q.correct) score++;
+
+  el.classList.add(idx === q.correct ? "correct" : "wrong");
+  document.querySelectorAll(".option")[q.correct].classList.add("correct");
+
+  explanation.innerText = q.exp;
+}
+
+function next() {
+  if (i < questions.length - 1) {
+    i++;
+    load();
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  quiz.style.display = "none";
+  result.style.display = "block";
+
+  const percent = Math.round(score / questions.length * 100);
+  finalScore.innerText = `نتيجتك ${percent}%`;
+  battery.style.width = percent + "%";
+  batteryText.innerText = percent + "%";
+
+  battery.style.background =
+    percent < 40 ? "red" :
+    percent < 70 ? "orange" : "green";
+}
+
+function startReview() {
+  reviewMode = true;
+  i = 0;
+  result.style.display = "none";
+  quiz.style.display = "block";
+  load();
+}
+
+function restart() {
+  i = 0;
+  score = 0;
+  answers = [];
+  reviewMode = false;
+  result.style.display = "none";
+  quiz.style.display = "block";
+  load();
+}
+
+load();
+</script>
+
+</body>
+</html>
