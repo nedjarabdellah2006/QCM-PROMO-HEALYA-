@@ -2,38 +2,205 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>اختبار QCM</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اختبار تفاعلي</title>
 <style>
 body {
-  font-family: Arial;
-  direction: rtl;
-  background: #f0f0f0;
-  padding: 30px;
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
+h1 {
+    text-align: center;
+}
+.question-box {
+    background-color: #fff;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+button.option {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    margin: 5px 0;
+    font-size: 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+}
+button.option.correct { background-color: #4CAF50; color: #fff; }
+button.option.wrong { background-color: #f44336; color: #fff; }
+#review, #restart { padding: 15px 25px; margin: 10px; font-size: 18px; border-radius: 8px; cursor: pointer; }
+#battery {
+    width: 100%;
+    background-color: #ddd;
+    border-radius: 10px;
+    margin-top: 20px;
+    height: 30px;
+    overflow: hidden;
+}
+#battery-fill {
+    height: 100%;
+    width: 0%;
+    background-color: #4CAF50;
+    text-align: center;
+    color: white;
+    line-height: 30px;
+    font-weight: bold;
 }
 
-.box {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  max-width: 650px;
-  margin: auto;
+/* تصميم متجاوب للهاتف */
+@media only screen and (max-width: 600px) {
+    body { padding: 10px; }
+    button.option { font-size: 20px; padding: 20px; }
+    #review, #restart { font-size: 20px; padding: 20px; }
+    #battery { height: 40px; }
+    #battery-fill { line-height: 40px; font-size: 18px; }
+}
+</style>
+</head>
+<body>
+
+<h1>اختبار تفاعلي</h1>
+
+<div id="quiz-container">
+    <!-- الأسئلة ستظهر هنا -->
+</div>
+
+<div id="battery">
+    <div id="battery-fill">0%</div>
+</div>
+
+<div style="text-align:center;">
+    <button id="review">مراجعة</button>
+    <button id="restart">إعادة الاختبار</button>
+</div>
+
+<script>
+const questions = [
+    {
+        q: "من هو أفضل طريقة لكي تحقق هدفك يا عبد الله؟",
+        options: [
+            "شراء مرجع ضخم للبرمجة",
+            "التعلم مع شات جيبيتي وديبسيك",
+            "انصحك بعدم فعل ذلك",
+            "دعاء الله ان ينزل عليك وحي يعمل كأداة سحرية"
+        ],
+        answer: 1
+    },
+    {
+        q: "أفضل طريقة لتعلم HTML؟",
+        options: [
+            "قراءة كتاب مرة واحدة فقط",
+            "تطبيق مباشر على المفكرة",
+            "مشاهدة الفيديوهات فقط",
+            "تجاهل التجربة العملية"
+        ],
+        answer: 1
+    },
+    {
+        q: "ما الأداة الأفضل لتجربة كود JavaScript؟",
+        options: [
+            "المفكرة فقط",
+            "المتصفح مباشرة (Console)",
+            "قراءة النظرية فقط",
+            "تخمين النتائج"
+        ],
+        answer: 1
+    },
+    {
+        q: "ما هو أهم شيء لتطوير مشروعك؟",
+        options: [
+            "التعلم المستمر",
+            "الانتظار للصدفة",
+            "نسخ مشاريع الآخرين فقط",
+            "التخلي عند أول مشكلة"
+        ],
+        answer: 0
+    },
+    {
+        q: "كيف تجعل موقعك يظهر على الهاتف؟",
+        options: [
+            "لا يمكن ذلك",
+            "باستخدام تصميم متجاوب (Responsive Design)",
+            "تصغير كل شيء فقط",
+            "تجاهل الهواتف"
+        ],
+        answer: 1
+    }
+];
+
+let currentScore = 0;
+let userAnswers = [];
+
+function showQuiz() {
+    const container = document.getElementById('quiz-container');
+    container.innerHTML = '';
+    questions.forEach((qObj, index) => {
+        const box = document.createElement('div');
+        box.classList.add('question-box');
+        let qHtml = `<p>${index+1}. ${qObj.q}</p>`;
+        qObj.options.forEach((opt, i) => {
+            qHtml += `<button class="option" onclick="checkAnswer(${index}, ${i}, this)">${opt}</button>`;
+        });
+        box.innerHTML = qHtml;
+        container.appendChild(box);
+    });
 }
 
-.option {
-  border: 1px solid #ccc;
-  padding: 12px;
-  margin: 8px 0;
-  border-radius: 5px;
-  cursor: pointer;
+function checkAnswer(qIndex, optionIndex, btn) {
+    if(userAnswers[qIndex] != null) return; // منع إعادة الاختيار
+    userAnswers[qIndex] = optionIndex;
+    const correct = questions[qIndex].answer;
+    if(optionIndex === correct){
+        btn.classList.add('correct');
+        currentScore++;
+    } else {
+        btn.classList.add('wrong');
+        // تظليل الإجابة الصحيحة
+        const container = document.getElementById('quiz-container');
+        container.querySelectorAll('.question-box')[qIndex].querySelectorAll('button.option')[correct].classList.add('correct');
+    }
+    updateBattery();
 }
 
-.correct { background: #c8f7c5; border-color: green; }
-.wrong { background: #f7c5c5; border-color: red; }
-.chosen { border: 2px solid #333; }
+function updateBattery() {
+    const percent = Math.round((currentScore/questions.length)*100);
+    const batteryFill = document.getElementById('battery-fill');
+    batteryFill.style.width = percent + '%';
+    batteryFill.textContent = percent + '%';
+}
 
-button {
-  margin-top: 10px;
+document.getElementById('restart').addEventListener('click', ()=>{
+    currentScore = 0;
+    userAnswers = [];
+    updateBattery();
+    showQuiz();
+});
+
+document.getElementById('review').addEventListener('click', ()=>{
+    showQuiz(); // يعيد نفس الصفحة للمراجعة
+    questions.forEach((qObj, index)=>{
+        const correct = qObj.answer;
+        const container = document.getElementById('quiz-container');
+        const buttons = container.querySelectorAll('.question-box')[index].querySelectorAll('button.option');
+        buttons.forEach((btn,i)=>{
+            btn.classList.remove('correct','wrong');
+            if(i===correct) btn.classList.add('correct');
+        });
+    });
+});
+
+showQuiz();
+</script>
+
+</body>
+</html>
   padding: 10px;
   width: 100%;
   cursor: pointer;
@@ -220,3 +387,4 @@ load();
 
 </body>
 </html>
+
